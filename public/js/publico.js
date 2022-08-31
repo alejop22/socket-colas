@@ -1,3 +1,5 @@
 
 
-console.log('Público HTML')
+const socket = io();
+
+socket.on('estado-actual', )

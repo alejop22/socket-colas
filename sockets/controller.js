@@ -1,21 +1,43 @@
+const TicketControl = require("../models/ticket-control");
+
+const ticketControl = new TicketControl();
 
 const socketController = (socket) => {
 
-    socket.on('disconnect', () => {
+    socket.emit('cargar-ultimo', ticketControl.ultimoTicket);
+    socket.emit('tickets-pendientes', ticketControl.tickets.length);
 
+    socket.on('siguiente-ticket', (payload, callback) => {
+
+        const siguienteTicket = ticketControl.siguiente();
+
+        callback(siguienteTicket);
     });
 
-    socket.on('enviar-mensaje', (payload, callback) => {
-        
-        // envia el mensaje a todos los clientes conectados
-        // cuando no se tiene acceso al .io se usa el broadcast para emitir mensajes a todos los clientes,
-        // excepto al que envio el mensaje
-        // this.io.emit('enviar-mensaje', payload);
-        socket.broadcast.emit('enviar-mensaje', payload);
+    socket.on('atender-ticket', ({escritorio}, callback) => {
+        if (!escritorio) {
+            return callback({
+                ok: false,
+                msj: 'El escritorio es obligatorio'
+            });
+        }
 
-        // const id = payload+123;
-        // callback(id);
+        const ticket = ticketControl.atenderTicket(escritorio);
+        if (!ticket) {
+            return callback({
+                ok: false,
+                msj: 'No hay tickets disponibles'
+            });
+        }
+
+        callback({
+            ok: true,
+            ticket
+        });
+        socket.emit('tickets-pendientes', ticketControl.tickets.length);
     });
+
+    
 }
 
 module.exports = {
