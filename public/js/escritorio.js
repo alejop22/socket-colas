@@ -15,6 +15,7 @@ if (!searchParams.has('escritorio')) {
 const escritorio = searchParams.get('escritorio');
 divAlerta.style.display = 'none';
 
+lblEscritorio.innerText = escritorio
 const socket = io();
 
 socket.on('connect', () => {
@@ -26,7 +27,6 @@ socket.on('disconnect', () => {
 });
 
 socket.on('tickets-pendientes', payload => {
-    console.log(payload);
     lblPendientes.innerText = payload;
 });
 
